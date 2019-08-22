@@ -124,13 +124,6 @@ namespace ContactModels
         registry.registerProperty("Yeff", &MODEL_PARAMS::createYeff,"model jkr");
         registry.connect("Yeff", Yeff,"model jkr");
 
-
-        registry.registerProperty("resolutionJKR", &MODEL_PARAMS::createResolutionJKR,  "model jkr");
-        registry.connect("resolutionJKR", resolutionJKR,"model jkr");
-
-        //Initalize the Look Up Table (LUT) 
-        lut.init(resolutionJKR);
-
         if ((elasticpotflag_ || dissipatedflag_) && cmb->is_wall())
         {
             error->warning(FLERR, "Disabling energy computation in tangential component for wall due to unresolved issues");
@@ -199,18 +192,10 @@ namespace ContactModels
             const double radj = sidata.radj;
             double reff = sidata.is_wall ? radi : (radi*radj/(radi+radj));
 
-            //double Fc = 3./2.*M_PI*workOfAdhesion[itype][jtype]*reff;
+            double Fc = 3./2.*M_PI*workOfAdhesion[itype][jtype]*reff;
             //Calculate the effective contact force (Fn_jkr = Fn - daspot force)
-            //double Fn_contact = sidata.Fn + sidata.gamman*sidata.vn;
-            //Ft = Fn_contact+2.*Fc;
-
-            double Fc = lut.calculate_fc(workOfAdhesion[itype][jtype],reff);
-            double a_0 = lut.calculate_a0(workOfAdhesion[sidata.itype][sidata.jtype],reff,Yeff[itype][jtype]);
-            double delta_c = lut.calculate_delta_c(a_0,reff);
-            double Fn_contact = lut.get_fn_fc(sidata.deltan/delta_c)*Fc;
+            double Fn_contact = sidata.Fn + sidata.gamman*sidata.vn;
             Ft = Fn_contact+2.*Fc;
-
-
         }
 
         Ft_friction = xmu * fabs(Ft);
@@ -417,8 +402,6 @@ namespace ContactModels
     class ContactModelBase *cmb;
     int elastic_potential_offset_;
     double ** workOfAdhesion;
-    LUT lut;
-    double resolutionJKR;
     double ** Yeff;
     bool elasticpotflag_;
     int dissipation_history_offset_;

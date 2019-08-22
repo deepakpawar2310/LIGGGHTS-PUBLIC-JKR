@@ -70,7 +70,7 @@ double LUT::get_a_a0(double delta_delta_c_val)
 		a_a0_val = calculate_a_a0(delta_delta_c_val);
 		if (outside_LUT == false)
 		{
-			std::cout << "Simulation outside LUT table, increase resolution for speed! delta_delta_c = " 
+			std::cout << "Simulation outside LUT table, increase the resolution for speed! delta_delta_c = " 
 								<< delta_delta_c_val << std::endl;
 			outside_LUT = true;
 		}

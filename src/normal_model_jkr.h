@@ -88,7 +88,7 @@ namespace ContactModels
       NormalModelBase(lmp, hsetup, c),
       Yeff(NULL),
       Geff(NULL),
-      cor_e(NULL),
+      betaeff(NULL),
       limitForce(false),
       displayedSettings(false),
       cmb(c),
@@ -129,13 +129,13 @@ namespace ContactModels
     {
       registry.registerProperty("Yeff", &MODEL_PARAMS::createYeff,"model jkr");
       registry.registerProperty("Geff", &MODEL_PARAMS::createGeff,"model jkr");
-      registry.registerProperty("cor_e", &MODEL_PARAMS::createCoeffRest,"model jkr");
+      registry.registerProperty("betaeff", &MODEL_PARAMS::createBetaEff,"model jkr");
       registry.registerProperty("workOfAdhesion", &MODEL_PARAMS::createWorkOfAdhesion,  "model jkr");
       registry.registerProperty("resolutionJKR", &MODEL_PARAMS::createResolutionJKR,  "model jkr");
 
       registry.connect("Yeff", Yeff,"model jkr");
       registry.connect("Geff", Geff,"model jkr");
-      registry.connect("cor_e", cor_e,"model jkr");
+      registry.connect("betaeff", betaeff,"model jkr");
       registry.connect("workOfAdhesion", workOfAdhesion,"model jkr");
       registry.connect("resolutionJKR", resolutionJKR,"model jkr");
       
@@ -235,28 +235,12 @@ namespace ContactModels
       const double kt = 8.*Geff[itype][jtype]*a;
       const double kn = 4./3.*Yeff[itype][jtype]*a;
 
-      double alpha;
-      //Skip calculating alpha if no damping 
-      if (1 - cor_e[itype][jtype] >= 0.00001) {
-        alpha = 1.2728 
-          - 4.2783*cor_e[itype][jtype]
-          + 11.087*pow(cor_e[itype][jtype],2.0)
-          - 22.348*pow(cor_e[itype][jtype],3.0)
-          + 27.467*pow(cor_e[itype][jtype],4.0)
-          - 18.022*pow(cor_e[itype][jtype],5.0)
-          + 4.8218*pow(cor_e[itype][jtype],6.0);
-      }
-      else {
-        alpha = 0.0;
-      }
-        
-
-      // gamman == nu_N in marshall 2009
-      double gamman = alpha*sqrt(meff*kn);
+      const double Sn=2.*Yeff[itype][jtype]*sqrt(reff*sidata.deltan);
+      const double St=8.*Geff[itype][jtype]*sqrt(reff*sidata.deltan);
+      const double sqrtFiveOverSix = 0.91287092917527685576161630466800355658790782499663875;
+      const double gamman=-2.*sqrtFiveOverSix*betaeff[itype][jtype]*sqrt(Sn*meff);
+      const double gammat= tangential_damping ? -2.*sqrtFiveOverSix*betaeff[itype][jtype]*sqrt(St*meff) : 0.0;
       double Fn_damping = -gamman*sidata.vn;
-
-      // using nu_T = Nu_N i.e. gammat = gamman
-      double gammat = tangential_damping ? gamman : 0.0;
 
       double Fn = Fn_contact + Fn_damping;
 
@@ -410,7 +394,7 @@ namespace ContactModels
   protected:
     double ** Yeff;
     double ** Geff;
-    double ** cor_e;
+    double ** betaeff;
     bool limitForce;
     bool displayedSettings;
     class ContactModelBase *cmb;
