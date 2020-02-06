@@ -1,3 +1,25 @@
+This is LIGGGHTS v3.8.0 with added contact models for accounting for adhesion using the JKR model.
+Compared to the official release this repository also includes the following files in the src folder:
+
+normal_model_jkr.h
+tangential_model_jkr_tan.h
+rolling_model_cdt_jkr.h
+
+jkr_lookup_table.cpp
+jkr_lookup_table.h
+
+PolynomialRootFinder.h
+PolynomialRootFinder.cpp
+
+The model implementation is presented in:
+Eidevåg, T., Abrahamsson, P., Eng, M., & Rasmuson, A. (2019). 
+Modeling of dry snow adhesion during normal impact with surfaces. 
+Powder Technology, 361, 1081–1092. https://doi.org/10.1016/j.powtec.2019.10.085
+
+Please be so kind to cite our work if you successfully use the contact models in your research.
+
+
+Original README text file:
 ----------------------------------------------------------------------
 This is the
 
